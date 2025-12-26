@@ -1,0 +1,34 @@
+[
+  {
+    "id": "1",
+    "name": "Nasi Goreng Spesial",
+    "description": "Nasi goreng dengan telur, ayam, dan sambal khas.",
+    "price": 25000,
+    "image": "https://via.placeholder.com/300x200.png?text=Nasi+Goreng",
+    "category": "Makanan"
+  },
+  {
+    "id": "2",
+    "name": "Mie Ayam",
+    "description": "Mie ayam dengan pangsit dan kuah kaldu sedap.",
+    "price": 20000,
+    "image": "https://via.placeholder.com/300x200.png?text=Mie+Ayam",
+    "category": "Makanan"
+  },
+  {
+    "id": "3",
+    "name": "Es Teh Manis",
+    "description": "Es teh manis dingin.",
+    "price": 5000,
+    "image": "https://via.placeholder.com/300x200.png?text=Es+Teh",
+    "category": "Minuman"
+  },
+  {
+    "id": "4",
+    "name": "Kopi Hitam",
+    "description": "Kopi hitam panas/ dingin.",
+    "price": 10000,
+    "image": "https://via.placeholder.com/300x200.png?text=Kopi",
+    "category": "Minuman"
+  }
+]
