@@ -31,7 +31,7 @@ class AdminDrawer extends StatelessWidget {
   
   // Constructor: wajib isi currentRoute saat pakai widget ini
   // Contoh: AdminDrawer(currentRoute: '/admin')
-  const AdminDrawer({Key? key, required this.currentRoute}) : super(key: key);
+  const AdminDrawer({super.key, required this.currentRoute});
 
   @override
   Widget build(BuildContext context) {

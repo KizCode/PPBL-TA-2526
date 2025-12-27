@@ -36,7 +36,7 @@ class AdminDashboard extends StatefulWidget {
   // routeName: Konstanta untuk route ini (dipakai di Navigator)
   static const routeName = '/admin';
   
-  const AdminDashboard({Key? key}) : super(key: key);
+  const AdminDashboard({super.key});
 
   @override
   State<AdminDashboard> createState() => _AdminDashboardState();

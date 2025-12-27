@@ -6,7 +6,7 @@ import '../../widgets/network_image_widget.dart';
 
 class MenuScreen extends StatefulWidget {
   static const routeName = '/';
-  const MenuScreen({Key? key}) : super(key: key);
+  const MenuScreen({super.key});
 
   @override
   _MenuScreenState createState() => _MenuScreenState();

@@ -6,7 +6,7 @@ import '../../../widgets/admin_drawer.dart';
 
 class IngredientAdminScreen extends StatelessWidget {
   static const routeName = '/admin/ingredients';
-  const IngredientAdminScreen({Key? key}) : super(key: key);
+  const IngredientAdminScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

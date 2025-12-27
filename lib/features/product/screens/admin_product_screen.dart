@@ -40,7 +40,7 @@ import '../../../widgets/admin_drawer.dart';
 // ============================================================================
 class ProductAdminScreen extends StatefulWidget {
   static const routeName = '/admin/products';
-  const ProductAdminScreen({Key? key}) : super(key: key);
+  const ProductAdminScreen({super.key});
 
   @override
   State<ProductAdminScreen> createState() => _ProductAdminScreenState();
@@ -468,7 +468,7 @@ class _ProductAdminScreenState extends State<ProductAdminScreen> {
               // StatefulBuilder: Mini-state untuk update dropdown tanpa rebuild seluruh dialog
               StatefulBuilder(
                 builder: (ctx, setState) => DropdownButtonFormField<String>(
-                  value: selectedCategory,
+                  initialValue: selectedCategory,
                   decoration: const InputDecoration(labelText: 'Kategori'),
                   
                   // items: List kategori aktif dari CategoryProvider

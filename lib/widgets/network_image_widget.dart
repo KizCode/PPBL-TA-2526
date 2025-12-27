@@ -7,7 +7,7 @@ class NetworkImageWidget extends StatelessWidget {
   final double? width;
   final double? height;
 
-  const NetworkImageWidget({Key? key, this.url, this.fit = BoxFit.cover, this.width, this.height}) : super(key: key);
+  const NetworkImageWidget({super.key, this.url, this.fit = BoxFit.cover, this.width, this.height});
 
   bool _isNetwork(String? u) => u != null && (u.startsWith('http://') || u.startsWith('https://'));
   bool _isBase64(String? u) => u != null && u.startsWith('data:image');

@@ -6,7 +6,7 @@ import '../../../widgets/admin_drawer.dart';
 
 class CategoryAdminScreen extends StatelessWidget {
   static const routeName = '/admin/categories';
-  const CategoryAdminScreen({Key? key}) : super(key: key);
+  const CategoryAdminScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
