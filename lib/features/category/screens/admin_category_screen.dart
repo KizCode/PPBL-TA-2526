@@ -93,16 +93,12 @@ class CategoryAdminScreen extends StatelessWidget {
                       cat.name,
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(cat.description),
-                        // Text(
-                        //   'Urutan: ${cat.sortOrder}',
-                        //   style: const TextStyle(fontSize: 11),
-                        // ),
-                      ],
-                    ),
+                    // subtitle: Column(
+                    //   crossAxisAlignment: CrossAxisAlignment.start,
+                    //   children: [
+                    //     Text(cat.description),
+                    //   ],
+                    // ),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
