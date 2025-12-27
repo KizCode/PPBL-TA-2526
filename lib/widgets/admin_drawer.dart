@@ -28,7 +28,7 @@ class AdminDrawer extends StatelessWidget {
   // Property: route halaman yang sedang aktif
   // Digunakan untuk highlight menu yang sesuai
   final String currentRoute;
-  
+
   // Constructor: wajib isi currentRoute saat pakai widget ini
   // Contoh: AdminDrawer(currentRoute: '/admin')
   const AdminDrawer({super.key, required this.currentRoute});
@@ -41,7 +41,7 @@ class AdminDrawer extends StatelessWidget {
     return Drawer(
       // ListView = Scrollable list (jika menu banyak, bisa di-scroll)
       child: ListView(
-        padding: EdgeInsets.zero,  // Hapus padding default
+        padding: EdgeInsets.zero, // Hapus padding default
         children: [
           // ==================================================================
           // DRAWER HEADER - Bagian atas dengan gradient & info app
@@ -51,24 +51,31 @@ class AdminDrawer extends StatelessWidget {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [Colors.green[800]!, Colors.green[600]!],
-                begin: Alignment.topLeft,      // Mulai dari kiri atas
-                end: Alignment.bottomRight,    // Ke kanan bawah
+                begin: Alignment.topLeft, // Mulai dari kiri atas
+                end: Alignment.bottomRight, // Ke kanan bawah
               ),
             ),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,  // Align kiri
-              mainAxisAlignment: MainAxisAlignment.end,      // Posisi bawah
+              crossAxisAlignment: CrossAxisAlignment.start, // Align kiri
+              mainAxisAlignment: MainAxisAlignment.end, // Posisi bawah
               children: [
                 // Icon admin panel
-                const Icon(Icons.admin_panel_settings, size: 48, color: Colors.white),
-                const SizedBox(height: 8),  // Spacing vertikal
-                
+                const Icon(
+                  Icons.admin_panel_settings,
+                  size: 48,
+                  color: Colors.white,
+                ),
+                const SizedBox(height: 8), // Spacing vertikal
                 // Judul aplikasi
                 const Text(
                   'CafeSync Admin',
-                  style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-                
+
                 // Subtitle
                 Text(
                   'Manajemen Sistem',
@@ -77,47 +84,45 @@ class AdminDrawer extends StatelessWidget {
               ],
             ),
           ),
-          
+
           // ==================================================================
           // MENU ITEMS - Daftar navigasi
           // ==================================================================
-          
+
           // Menu Dashboard
           _buildMenuItem(
             context,
             icon: Icons.dashboard,
             title: 'Dashboard',
-            route: AdminDashboard.routeName,  // '/admin'
+            route: AdminDashboard.routeName, // '/admin'
           ),
-          
-          const Divider(),  // Garis pemisah
-          
+
+          const Divider(), // Garis pemisah
           // Menu Manajemen Menu/Produk
           _buildMenuItem(
             context,
             icon: Icons.restaurant_menu,
             title: 'Manajemen Menu',
-            route: ProductAdminScreen.routeName,  // '/admin/products'
+            route: ProductAdminScreen.routeName, // '/admin/products'
           ),
-          
+
           // Menu Stok Bahan
           _buildMenuItem(
             context,
             icon: Icons.inventory_2,
             title: 'Stok Bahan',
-            route: IngredientAdminScreen.routeName,  // '/admin/ingredients'
+            route: IngredientAdminScreen.routeName, // '/admin/ingredients'
           ),
-          
+
           // Menu Kategori
           _buildMenuItem(
             context,
             icon: Icons.category,
             title: 'Kategori',
-            route: CategoryAdminScreen.routeName,  // '/admin/categories'
+            route: CategoryAdminScreen.routeName, // '/admin/categories'
           ),
-          
-          const Divider(),  // Garis pemisah
-          
+
+          const Divider(), // Garis pemisah
           // ==================================================================
           // MENU TENTANG - Dialog info aplikasi
           // ==================================================================
@@ -125,17 +130,19 @@ class AdminDrawer extends StatelessWidget {
             leading: const Icon(Icons.info_outline, color: Colors.grey),
             title: const Text('Tentang'),
             onTap: () {
-              Navigator.pop(context);  // Tutup drawer dulu
-              
+              Navigator.pop(context); // Tutup drawer dulu
+
               // Tampilkan dialog info
               showDialog(
                 context: context,
                 builder: (ctx) => AlertDialog(
                   title: const Text('CafeSync Admin v1.0'),
-                  content: const Text('Sistem manajemen cafe untuk CRUD menu, stok bahan, dan kategori.'),
+                  content: const Text(
+                    'Sistem manajemen cafe untuk CRUD menu, stok bahan, dan kategori.',
+                  ),
                   actions: [
                     TextButton(
-                      onPressed: () => Navigator.pop(ctx),  // Tutup dialog
+                      onPressed: () => Navigator.pop(ctx), // Tutup dialog
                       child: const Text('OK'),
                     ),
                   ],
@@ -159,58 +166,48 @@ class AdminDrawer extends StatelessWidget {
   // - icon: Icon yang ditampilkan di sebelah kiri
   // - title: Text menu
   // - route: Route tujuan saat menu diklik
-  Widget _buildMenuItem(BuildContext context, {
+  Widget _buildMenuItem(
+    BuildContext context, {
     required IconData icon,
     required String title,
     required String route,
   }) {
-    // Cek apakah menu ini sedang aktif (route sama dengan currentRoute)
     final isActive = currentRoute == route;
-    
-    // ========================================================================
-    // ListTile - Widget untuk item list dengan leading, title, trailing
-    // ========================================================================
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    Color textColor;
+    Color? iconColor;
+    Color? selectedTileColor;
+    if (isDark) {
+      textColor = Colors.white;
+      iconColor = Colors.white;
+      selectedTileColor = Colors.green[900]?.withOpacity(0.3);
+    } else {
+      textColor = isActive ? Colors.green[700]! : Colors.black87;
+      iconColor = isActive ? Colors.green[700] : Colors.grey[700];
+      selectedTileColor = Colors.green[50];
+    }
     return ListTile(
-      // selected: true → Tampilkan sebagai item aktif
       selected: isActive,
-      
-      // selectedTileColor: Warna background saat item aktif (hijau muda)
-      selectedTileColor: Colors.green[50],
-      
-      // leading: Widget di sebelah kiri (icon)
-      leading: Icon(
-        icon,
-        // Warna icon: hijau jika aktif, abu-abu jika tidak
-        color: isActive ? Colors.green[700] : Colors.grey[700],
-      ),
-      
-      // title: Text menu
+      selectedTileColor: selectedTileColor,
+      leading: Icon(icon, color: isDark ? iconColor : iconColor),
       title: Text(
         title,
         style: TextStyle(
-          // Font bold jika aktif, normal jika tidak
           fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
-          // Warna text: hijau jika aktif, hitam jika tidak
-          color: isActive ? Colors.green[700] : Colors.black87,
+          color: textColor,
         ),
       ),
-      
-      // trailing: Widget di sebelah kanan (arrow jika aktif, null jika tidak)
-      trailing: isActive ? Icon(Icons.arrow_right, color: Colors.green[700]) : null,
-      
-      // onTap: Callback saat menu diklik
+      trailing: isActive
+          ? Icon(
+              Icons.arrow_right,
+              color: isDark ? Colors.white : Colors.green[700],
+            )
+          : null,
       onTap: () {
-        // 1. Tutup drawer
         Navigator.pop(context);
-        
-        // 2. Navigasi ke route (jika bukan halaman yang sedang aktif)
         if (!isActive) {
-          // pushReplacementNamed: Ganti halaman (tidak bisa back ke sebelumnya)
-          // Kenapa replacement? Karena navigasi drawer biasanya top-level,
-          // tidak perlu back stack yang dalam
           Navigator.pushReplacementNamed(context, route);
         }
-        // Jika sudah di halaman ini, tidak perlu navigasi (cuma tutup drawer)
       },
     );
   }
