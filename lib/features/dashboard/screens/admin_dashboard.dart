@@ -19,7 +19,9 @@ import 'package:provider/provider.dart';
 import '../../ingredient/providers/ingredient_provider.dart';
 import '../../product/providers/product_admin_provider.dart';
 import '../../category/providers/category_provider.dart';
+
 import '../../../widgets/admin_drawer.dart';
+import 'settings_screen.dart';
 
 // ============================================================================
 // CLASS AdminDashboard - StatefulWidget untuk dashboard dengan data dinamis
@@ -35,7 +37,7 @@ import '../../../widgets/admin_drawer.dart';
 class AdminDashboard extends StatefulWidget {
   // routeName: Konstanta untuk route ini (dipakai di Navigator)
   static const routeName = '/admin';
-  
+
   const AdminDashboard({super.key});
 
   @override
@@ -55,7 +57,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
   // LIFECYCLE METHOD: didChangeDependencies()
   // ==========================================================================
   // Dipanggil setelah widget terpasang ke widget tree dan bisa akses context
-  // 
+  //
   // Lifecycle Flutter Widget:
   // 1. Constructor (AdminDashboard())
   // 2. createState() → Buat state
@@ -70,11 +72,11 @@ class _AdminDashboardState extends State<AdminDashboard> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    
+
     // Load data hanya sekali saat pertama kali widget dibuat
     if (!_isLoaded) {
-      _isLoaded = true;  // Set flag agar tidak load lagi
-      
+      _isLoaded = true; // Set flag agar tidak load lagi
+
       // Load data dari database via provider
       // listen: false → Tidak subscribe ke perubahan (hanya ambil data)
       Provider.of<IngredientProvider>(context, listen: false).loadIngredients();
@@ -104,24 +106,23 @@ class _AdminDashboardState extends State<AdminDashboard> {
         title: const Text('Dashboard'),
         backgroundColor: Colors.green[700],
       ),
-      
+
       // Drawer: Menu navigasi samping (hamburger menu)
       drawer: const AdminDrawer(currentRoute: AdminDashboard.routeName),
-      
+
       // Body: Konten utama halaman
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        
+
         // ====================================================================
         // GRIDVIEW - Layout grid 2 kolom untuk dashboard cards
         // ====================================================================
         // GridView.count: Grid dengan jumlah kolom tetap
         // Alternatif: GridView.builder (untuk data dinamis panjang)
         child: GridView.count(
-          crossAxisCount: 2,        // 2 kolom
-          crossAxisSpacing: 16,     // Jarak horizontal antar card
-          mainAxisSpacing: 16,      // Jarak vertical antar card
-          
+          crossAxisCount: 2, // 2 kolom
+          crossAxisSpacing: 16, // Jarak horizontal antar card
+          mainAxisSpacing: 16, // Jarak vertical antar card
           // children: List widget yang ditampilkan di grid
           children: [
             // ================================================================
@@ -135,7 +136,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
               color: Colors.green[600]!,
               onTap: () => Navigator.pushNamed(context, '/admin/products'),
             ),
-            
+
             // ================================================================
             // CARD 2: Stok Bahan (Ingredients) - dengan badge low stock
             // ================================================================
@@ -145,13 +146,13 @@ class _AdminDashboardState extends State<AdminDashboard> {
               title: 'Stok Bahan',
               subtitle: '${ingredientProvider.ingredients.length} bahan',
               // badge: Tampilkan alert jika ada bahan stok rendah
-              badge: ingredientProvider.lowStockCount > 0 
-                  ? '${ingredientProvider.lowStockCount} Rendah!' 
+              badge: ingredientProvider.lowStockCount > 0
+                  ? '${ingredientProvider.lowStockCount} Rendah!'
                   : null,
               color: Colors.green,
               onTap: () => Navigator.pushNamed(context, '/admin/ingredients'),
             ),
-            
+
             // ================================================================
             // CARD 3: Kategori
             // ================================================================
@@ -163,7 +164,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
               color: Colors.purple,
               onTap: () => Navigator.pushNamed(context, '/admin/categories'),
             ),
-            
+
             // ================================================================
             // CARD 4: Pengaturan (placeholder, belum ada screen)
             // ================================================================
@@ -174,10 +175,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
               subtitle: 'Konfigurasi',
               color: Colors.blueGrey,
               onTap: () {
-                // SnackBar: Tampilkan notifikasi sementara di bawah layar
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Fitur dalam pengembangan')),
-                );
+                Navigator.pushNamed(context, SettingsScreen.routeName);
               },
             ),
           ],
@@ -209,14 +207,13 @@ class _AdminDashboardState extends State<AdminDashboard> {
     required String subtitle,
     required Color color,
     required VoidCallback onTap,
-    String? badge,  // Optional parameter (bisa null)
+    String? badge, // Optional parameter (bisa null)
   }) {
     // ========================================================================
     // CARD - Material Design card dengan shadow
     // ========================================================================
     return Card(
-      elevation: 4,  // Tinggi shadow (0 = flat, 24 = sangat tinggi)
-      
+      elevation: 4, // Tinggi shadow (0 = flat, 24 = sangat tinggi)
       // ======================================================================
       // INKWELL - Widget untuk detect tap dengan efek ripple
       // ======================================================================
@@ -224,8 +221,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
       // - InkWell: Ada efek visual ripple saat diklik (Material Design)
       // - GestureDetector: Tidak ada efek visual, hanya detect gesture
       child: InkWell(
-        onTap: onTap,  // Callback saat card diklik
-        
+        onTap: onTap, // Callback saat card diklik
         // ====================================================================
         // STACK - Overlay widget bertumpuk (badge di atas card content)
         // ====================================================================
@@ -237,27 +233,28 @@ class _AdminDashboardState extends State<AdminDashboard> {
             // ==================================================================
             Padding(
               padding: const EdgeInsets.all(16.0),
-              
+
               // ================================================================
               // COLUMN - Layout vertical (icon, title, subtitle dari atas ke bawah)
               // ================================================================
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,  // Center vertical
+                mainAxisAlignment: MainAxisAlignment.center, // Center vertical
                 children: [
                   // Icon besar dengan warna custom
                   Icon(icon, size: 48, color: color),
-                  
-                  const SizedBox(height: 12),  // Spasi 12px
-                  
+
+                  const SizedBox(height: 12), // Spasi 12px
                   // Title dengan font bold
                   Text(
                     title,
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                     textAlign: TextAlign.center,
                   ),
-                  
-                  const SizedBox(height: 4),  // Spasi 4px
-                  
+
+                  const SizedBox(height: 4), // Spasi 4px
                   // Subtitle dengan warna abu-abu
                   Text(
                     subtitle,
@@ -267,7 +264,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                 ],
               ),
             ),
-            
+
             // ==================================================================
             // LAYER 2 (Top): Badge alert (jika ada)
             // ==================================================================
@@ -283,21 +280,24 @@ class _AdminDashboardState extends State<AdminDashboard> {
                 top: 8,
                 right: 8,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+
                   // Decoration: Background merah dengan border radius
                   decoration: BoxDecoration(
                     color: Colors.red,
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  
+
                   // Text putih kecil bold
                   child: Text(
                     badge,
                     style: const TextStyle(
-                      color: Colors.white, 
-                      fontSize: 10, 
-                      fontWeight: FontWeight.bold
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),

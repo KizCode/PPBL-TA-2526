@@ -6,18 +6,20 @@
 // ============================================================================
 
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 import 'package:sqflite/sqflite.dart';
 
 // Import Provider - untuk mengelola state/data aplikasi
-import 'features/ingredient/providers/ingredient_provider.dart';      // Kelola data stok bahan
-import 'features/category/providers/category_provider.dart';          // Kelola data kategori menu
-import 'features/product/providers/product_admin_provider.dart';      // Kelola data produk/menu
+import 'features/ingredient/providers/ingredient_provider.dart'; // Kelola data stok bahan
+import 'features/category/providers/category_provider.dart'; // Kelola data kategori menu
+import 'features/product/providers/product_admin_provider.dart'; // Kelola data produk/menu
 
 // Import Screens - semua halaman aplikasi
 import 'features/menu/menu_screen.dart';
+import 'features/dashboard/screens/settings_screen.dart';
 import 'features/dashboard/screens/admin_dashboard.dart';
 import 'features/product/screens/admin_product_screen.dart';
 import 'features/ingredient/screens/admin_ingredient_screen.dart';
@@ -33,7 +35,7 @@ void main() {
   if (kIsWeb) {
     databaseFactory = databaseFactoryFfiWeb;
   }
-  
+
   runApp(const MyApp());
 }
 
@@ -42,71 +44,74 @@ void main() {
 // ============================================================================
 // StatelessWidget = Widget yang tidak berubah (immutable)
 // Widget ini adalah parent/induk dari semua widget lainnya
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
-  
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  ThemeMode _themeMode = ThemeMode.system;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadThemeMode();
+  }
+
+  Future<void> _loadThemeMode() async {
+    final prefs = await SharedPreferences.getInstance();
+    final themeString = prefs.getString('theme_mode') ?? 'system';
+    setState(() {
+      switch (themeString) {
+        case 'light':
+          _themeMode = ThemeMode.light;
+          break;
+        case 'dark':
+          _themeMode = ThemeMode.dark;
+          break;
+        default:
+          _themeMode = ThemeMode.system;
+      }
+    });
+  }
+
+  Future<void> _updateThemeMode(ThemeMode? mode) async {
+    setState(() {
+      _themeMode = mode ?? ThemeMode.system;
+    });
+    final prefs = await SharedPreferences.getInstance();
+    String value = 'system';
+    if (mode == ThemeMode.light) value = 'light';
+    if (mode == ThemeMode.dark) value = 'dark';
+    await prefs.setString('theme_mode', value);
+  }
+
   @override
   Widget build(BuildContext context) {
-    // ========================================================================
-    // MULTIPROVIDER - State Management Global
-    // ========================================================================
-    // MultiProvider membungkus seluruh aplikasi sehingga semua widget bisa
-    // mengakses data dari provider tanpa harus passing data manual
-    // 
-    // Cara kerja:
-    // 1. Provider menyimpan data (List products, ingredients, dll)
-    // 2. Saat data berubah, provider.notifyListeners() dipanggil
-    // 3. Semua widget yang "listening" akan auto rebuild dengan data baru
     return MultiProvider(
       providers: [
-        // ChangeNotifierProvider = Provider yang bisa notify perubahan data
-        // create: (_) => ... : Membuat instance provider sekali saat app start
-        
         ChangeNotifierProvider(create: (_) => IngredientProvider()),
-        // ↑ Provider untuk kelola stok bahan (tambah, edit, hapus, cek low stock)
-        
         ChangeNotifierProvider(create: (_) => CategoryProvider()),
-        // ↑ Provider untuk kelola kategori menu (Coffee, Snack, Dessert, dll)
-        
         ChangeNotifierProvider(create: (_) => ProductAdminProvider()),
-        // ↑ Provider untuk kelola menu/produk (CRUD produk cafe)
       ],
-      
-      // ======================================================================
-      // MATERIALAPP - Konfigurasi Aplikasi
-      // ======================================================================
       child: MaterialApp(
-        title: 'CafeSync Admin',  // Nama aplikasi (muncul di task manager)
-        
-        // Theme = Tema visual aplikasi (warna, font, dll)
-        theme: ThemeData(primarySwatch: Colors.green),  // Tema hijau
-        
-        // initialRoute = Halaman pertama yang dibuka saat app start
-        initialRoute: AdminDashboard.routeName,  // '/admin' (dashboard)
-        
-        // ====================================================================
-        // ROUTES - Mapping Nama Route ke Widget Screen
-        // ====================================================================
-        // Route = Alamat/path halaman, seperti URL di web
-        // Format: 'nama_route': (context) => WidgetScreen()
-        // 
-        // Cara navigasi:
-        // Navigator.pushNamed(context, '/admin/products') → buka halaman menu
+        title: 'CafeSync Admin',
+        theme: ThemeData(primarySwatch: Colors.green),
+        darkTheme: ThemeData.dark(),
+        themeMode: _themeMode,
+        initialRoute: AdminDashboard.routeName,
         routes: {
           AdminDashboard.routeName: (_) => const AdminDashboard(),
-          // '/admin' → Halaman Dashboard (overview stats)
-          
           ProductAdminScreen.routeName: (_) => const ProductAdminScreen(),
-          // '/admin/products' → Halaman CRUD Menu/Produk
-          
           IngredientAdminScreen.routeName: (_) => const IngredientAdminScreen(),
-          // '/admin/ingredients' → Halaman CRUD & Monitor Stok Bahan
-          
           CategoryAdminScreen.routeName: (_) => const CategoryAdminScreen(),
-          // '/admin/categories' → Halaman CRUD Kategori Menu
-          
           MenuScreen.routeName: (_) => MenuScreen(),
-          // '/' → Halaman Preview Menu (opsional)
+          '/admin/settings': (_) => SettingsScreen(
+            onThemeChanged: _updateThemeMode,
+            currentThemeMode: _themeMode,
+          ),
         },
       ),
     );
