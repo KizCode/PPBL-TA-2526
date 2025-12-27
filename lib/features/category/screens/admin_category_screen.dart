@@ -31,7 +31,10 @@ class CategoryAdminScreen extends StatelessWidget {
                 children: [
                   Icon(Icons.category, size: 64, color: Colors.grey[300]),
                   const SizedBox(height: 16),
-                  Text('Belum ada kategori', style: TextStyle(color: Colors.grey[600])),
+                  Text(
+                    'Belum ada kategori',
+                    style: TextStyle(color: Colors.grey[600]),
+                  ),
                   const SizedBox(height: 8),
                   ElevatedButton.icon(
                     onPressed: () => _showAddEditDialog(context, null),
@@ -44,8 +47,32 @@ class CategoryAdminScreen extends StatelessWidget {
           : ReorderableListView.builder(
               padding: const EdgeInsets.all(8),
               itemCount: provider.categories.length,
-              onReorder: (oldIndex, newIndex) {
-                // Reordering logic bisa ditambahkan di sini
+              onReorder: (oldIndex, newIndex) async {
+                // Penyesuaian index jika drag ke bawah
+                if (newIndex > oldIndex) newIndex -= 1;
+                final provider = Provider.of<CategoryProvider>(
+                  context,
+                  listen: false,
+                );
+                final cat = provider.categories.removeAt(oldIndex);
+                provider.categories.insert(newIndex, cat);
+                // Update sortOrder sesuai urutan baru
+                for (int i = 0; i < provider.categories.length; i++) {
+                  final c = provider.categories[i];
+                  if (c.sortOrder != i) {
+                    final updated = models.Category(
+                      id: c.id,
+                      name: c.name,
+                      description: c.description,
+                      icon: c.icon,
+                      sortOrder: i,
+                      isActive: c.isActive,
+                    );
+                    provider.categories[i] = updated;
+                    await provider.updateCategory(updated);
+                  }
+                }
+                provider.notifyListeners();
               },
               itemBuilder: (context, idx) {
                 final cat = provider.categories[idx];
@@ -54,18 +81,26 @@ class CategoryAdminScreen extends StatelessWidget {
                   margin: const EdgeInsets.only(bottom: 8),
                   child: ListTile(
                     leading: CircleAvatar(
-                      backgroundColor: cat.isActive ? Colors.purple : Colors.grey,
+                      backgroundColor: cat.isActive
+                          ? Colors.purple
+                          : Colors.grey,
                       child: Text(
                         cat.icon.isNotEmpty ? cat.icon : '📁',
                         style: const TextStyle(fontSize: 24),
                       ),
                     ),
-                    title: Text(cat.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                    title: Text(
+                      cat.name,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(cat.description),
-                        Text('Urutan: ${cat.sortOrder}', style: const TextStyle(fontSize: 11)),
+                        // Text(
+                        //   'Urutan: ${cat.sortOrder}',
+                        //   style: const TextStyle(fontSize: 11),
+                        // ),
                       ],
                     ),
                     trailing: Row(
@@ -94,8 +129,33 @@ class CategoryAdminScreen extends StatelessWidget {
                             }
                           },
                           itemBuilder: (ctx) => [
-                            const PopupMenuItem(value: 'edit', child: Row(children: [Icon(Icons.edit, size: 18), SizedBox(width: 8), Text('Edit')])),
-                            const PopupMenuItem(value: 'delete', child: Row(children: [Icon(Icons.delete, size: 18, color: Colors.red), SizedBox(width: 8), Text('Hapus', style: TextStyle(color: Colors.red))])),
+                            const PopupMenuItem(
+                              value: 'edit',
+                              child: Row(
+                                children: [
+                                  Icon(Icons.edit, size: 18),
+                                  SizedBox(width: 8),
+                                  Text('Edit'),
+                                ],
+                              ),
+                            ),
+                            const PopupMenuItem(
+                              value: 'delete',
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.delete,
+                                    size: 18,
+                                    color: Colors.red,
+                                  ),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    'Hapus',
+                                    style: TextStyle(color: Colors.red),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ],
                         ),
                       ],
@@ -119,7 +179,9 @@ class CategoryAdminScreen extends StatelessWidget {
     final nameCtrl = TextEditingController(text: cat?.name);
     final descCtrl = TextEditingController(text: cat?.description);
     final iconCtrl = TextEditingController(text: cat?.icon);
-    final sortCtrl = TextEditingController(text: cat?.sortOrder.toString() ?? '0');
+    final sortCtrl = TextEditingController(
+      text: cat?.sortOrder.toString() ?? '0',
+    );
 
     showDialog(
       context: context,
@@ -129,30 +191,53 @@ class CategoryAdminScreen extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextField(controller: nameCtrl, decoration: const InputDecoration(labelText: 'Nama Kategori')),
-              TextField(controller: descCtrl, decoration: const InputDecoration(labelText: 'Deskripsi'), maxLines: 2),
-              TextField(controller: iconCtrl, decoration: const InputDecoration(labelText: 'Icon/Emoji (opsional)')),
-              TextField(controller: sortCtrl, decoration: const InputDecoration(labelText: 'Urutan Tampil'), keyboardType: TextInputType.number),
+              TextField(
+                controller: nameCtrl,
+                decoration: const InputDecoration(labelText: 'Nama Kategori'),
+              ),
+              TextField(
+                controller: descCtrl,
+                decoration: const InputDecoration(labelText: 'Deskripsi'),
+                maxLines: 2,
+              ),
+              TextField(
+                controller: iconCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Icon/Emoji (opsional)',
+                ),
+              ),
             ],
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Batal')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Batal'),
+          ),
           ElevatedButton(
             onPressed: () {
               final newCat = models.Category(
                 id: cat?.id,
                 name: nameCtrl.text.trim(),
                 description: descCtrl.text.trim(),
-                icon: iconCtrl.text.trim().isNotEmpty ? iconCtrl.text.trim() : '📁',
-                sortOrder: int.tryParse(sortCtrl.text) ?? 0,
+                icon: iconCtrl.text.trim().isNotEmpty
+                    ? iconCtrl.text.trim()
+                    : '📁',
+                // sortOrder akan diatur otomatis di provider
+                sortOrder: cat?.sortOrder ?? 0,
                 isActive: cat?.isActive ?? true,
               );
-              
+
               if (isEdit) {
-                Provider.of<CategoryProvider>(context, listen: false).updateCategory(newCat);
+                Provider.of<CategoryProvider>(
+                  context,
+                  listen: false,
+                ).updateCategory(newCat);
               } else {
-                Provider.of<CategoryProvider>(context, listen: false).addCategory(newCat);
+                Provider.of<CategoryProvider>(
+                  context,
+                  listen: false,
+                ).addCategory(newCat);
               }
               Navigator.pop(ctx);
             },
@@ -168,12 +253,20 @@ class CategoryAdminScreen extends StatelessWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Hapus Kategori?'),
-        content: Text('Hapus kategori "${cat.name}"?\n\nPerhatian: Menu dengan kategori ini akan tetap ada.'),
+        content: Text(
+          'Hapus kategori "${cat.name}"?\n\nPerhatian: Menu dengan kategori ini akan tetap ada.',
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Batal')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Batal'),
+          ),
           TextButton(
             onPressed: () {
-              Provider.of<CategoryProvider>(context, listen: false).deleteCategory(cat.id!);
+              Provider.of<CategoryProvider>(
+                context,
+                listen: false,
+              ).deleteCategory(cat.id!);
               Navigator.pop(ctx);
             },
             child: const Text('Hapus', style: TextStyle(color: Colors.red)),
