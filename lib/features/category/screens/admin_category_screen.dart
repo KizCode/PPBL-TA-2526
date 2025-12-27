@@ -78,80 +78,136 @@ class CategoryAdminScreen extends StatelessWidget {
                 final cat = provider.categories[idx];
                 return Card(
                   key: ValueKey(cat.id),
-                  margin: const EdgeInsets.only(bottom: 8),
-                  child: ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: cat.isActive
-                          ? Colors.purple
-                          : Colors.grey,
-                      child: Text(
-                        cat.icon.isNotEmpty ? cat.icon : '📁',
-                        style: const TextStyle(fontSize: 24),
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 4,
+                    vertical: 6,
+                  ),
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(18),
+                    splashColor: Colors.green.withOpacity(0.1),
+                    onTap: () {},
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
                       ),
-                    ),
-                    title: Text(
-                      cat.name,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    // subtitle: null,
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Switch(
-                          value: cat.isActive,
-                          onChanged: (val) {
-                            final updated = models.Category(
-                              id: cat.id,
-                              name: cat.name,
-                              description: cat.description,
-                              icon: cat.icon,
-                              sortOrder: cat.sortOrder,
-                              isActive: val,
-                            );
-                            provider.updateCategory(updated);
-                          },
+                      child: ListTile(
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 2,
                         ),
-                        PopupMenuButton<String>(
-                          onSelected: (val) {
-                            if (val == 'edit') {
-                              _showAddEditDialog(context, cat);
-                            } else if (val == 'delete') {
-                              _confirmDelete(context, cat);
-                            }
-                          },
-                          itemBuilder: (ctx) => [
-                            const PopupMenuItem(
-                              value: 'edit',
-                              child: Row(
-                                children: [
-                                  Icon(Icons.edit, size: 18),
-                                  SizedBox(width: 8),
-                                  Text('Edit'),
-                                ],
-                              ),
+                        leading: CircleAvatar(
+                          radius: 28,
+                          backgroundColor: cat.isActive
+                              ? const LinearGradient(
+                                          colors: [
+                                            Color(0xFF8BC34A),
+                                            Color(0xFF4CAF50),
+                                          ],
+                                          begin: Alignment.topLeft,
+                                          end: Alignment.bottomRight,
+                                        ).createShader(
+                                          const Rect.fromLTWH(0, 0, 56, 56),
+                                        ) !=
+                                        null
+                                    ? Colors.green[400]
+                                    : Colors.purple
+                              : Colors.grey[400],
+                          child: Text(
+                            cat.icon.isNotEmpty ? cat.icon : '📁',
+                            style: const TextStyle(fontSize: 28),
+                          ),
+                        ),
+                        title: Text(
+                          cat.name,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 18,
+                            letterSpacing: 0.2,
+                          ),
+                        ),
+                        subtitle: cat.description.trim().isNotEmpty
+                            ? Builder(
+                                builder: (context) => Text(
+                                  cat.description,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: Theme.of(context)
+                                        .textTheme
+                                        .bodySmall
+                                        ?.color
+                                        ?.withOpacity(0.8),
+                                  ),
+                                ),
+                              )
+                            : null,
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Switch(
+                              value: cat.isActive,
+                              activeColor: Colors.green[600],
+                              onChanged: (val) {
+                                final updated = models.Category(
+                                  id: cat.id,
+                                  name: cat.name,
+                                  description: cat.description,
+                                  icon: cat.icon,
+                                  sortOrder: cat.sortOrder,
+                                  isActive: val,
+                                );
+                                provider.updateCategory(updated);
+                              },
                             ),
-                            const PopupMenuItem(
-                              value: 'delete',
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    Icons.delete,
-                                    size: 18,
-                                    color: Colors.red,
+                            PopupMenuButton<String>(
+                              icon: const Icon(Icons.more_vert),
+                              onSelected: (val) {
+                                if (val == 'edit') {
+                                  _showAddEditDialog(context, cat);
+                                } else if (val == 'delete') {
+                                  _confirmDelete(context, cat);
+                                }
+                              },
+                              itemBuilder: (ctx) => [
+                                const PopupMenuItem(
+                                  value: 'edit',
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.edit, size: 18),
+                                      SizedBox(width: 8),
+                                      Text('Edit'),
+                                    ],
                                   ),
-                                  SizedBox(width: 8),
-                                  Text(
-                                    'Hapus',
-                                    style: TextStyle(color: Colors.red),
+                                ),
+                                const PopupMenuItem(
+                                  value: 'delete',
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.delete,
+                                        size: 18,
+                                        color: Colors.red,
+                                      ),
+                                      SizedBox(width: 8),
+                                      Text(
+                                        'Hapus',
+                                        style: TextStyle(color: Colors.red),
+                                      ),
+                                    ],
                                   ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
                           ],
                         ),
-                      ],
+                      ),
                     ),
-                    // isThreeLine: true,
                   ),
                 );
               },
