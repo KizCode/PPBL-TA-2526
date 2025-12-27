@@ -93,12 +93,7 @@ class CategoryAdminScreen extends StatelessWidget {
                       cat.name,
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
-                    // subtitle: Column(
-                    //   crossAxisAlignment: CrossAxisAlignment.start,
-                    //   children: [
-                    //     Text(cat.description),
-                    //   ],
-                    // ),
+                    // subtitle: null,
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -156,7 +151,7 @@ class CategoryAdminScreen extends StatelessWidget {
                         ),
                       ],
                     ),
-                    isThreeLine: true,
+                    // isThreeLine: true,
                   ),
                 );
               },
@@ -212,6 +207,10 @@ class CategoryAdminScreen extends StatelessWidget {
           ),
           ElevatedButton(
             onPressed: () {
+              final provider = Provider.of<CategoryProvider>(
+                context,
+                listen: false,
+              );
               final newCat = models.Category(
                 id: cat?.id,
                 name: nameCtrl.text.trim(),
@@ -219,8 +218,9 @@ class CategoryAdminScreen extends StatelessWidget {
                 icon: iconCtrl.text.trim().isNotEmpty
                     ? iconCtrl.text.trim()
                     : '📁',
-                // sortOrder akan diatur otomatis di provider
-                sortOrder: cat?.sortOrder ?? 0,
+                sortOrder: isEdit
+                    ? (cat?.sortOrder ?? 0)
+                    : provider.categories.length,
                 isActive: cat?.isActive ?? true,
               );
 
