@@ -35,7 +35,8 @@ class _HomeShellState extends State<HomeShell> {
 
   Future<void> _guardAuth() async {
     final loggedIn = await AuthPrefs.isLoggedIn();
-    if (!loggedIn && mounted) {
+    if (!loggedIn) {
+      if (!mounted) return;
       Navigator.pushNamedAndRemoveUntil(context, '/login', (r) => false);
       return;
     }

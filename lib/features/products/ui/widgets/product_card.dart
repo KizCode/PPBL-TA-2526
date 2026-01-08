@@ -39,6 +39,14 @@ class ProductCard extends StatelessWidget {
                   Text(product.name, style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 6),
                   Text('Harga: ${_formatRupiah(product.price)}'),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Stok: ${product.stock}',
+                    style: TextStyle(
+                      color: product.stock > 0 ? Colors.green : Colors.red,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
                 ],
               ),
             ),

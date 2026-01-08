@@ -24,7 +24,7 @@ class AppDatabase {
     final path = '${await getDatabasesPath()}/lalana_kafe.db';
     return await openDatabase(
       path,
-      version: 2,
+      version: 4,
       onConfigure: (db) async {
         await db.execute('PRAGMA foreign_keys = ON');
       },
@@ -48,6 +48,14 @@ class AppDatabase {
       await db.execute(MaterialDb.createTableSql);
       await db.execute(ProductDb.createTableSql);
       await db.execute(RecipeDb.createTableSql);
+    }
+    if (oldVersion < 3) {
+      // Add stock column to products table
+      await db.execute('ALTER TABLE products ADD COLUMN stock INTEGER NOT NULL DEFAULT 0');
+    }
+    if (oldVersion < 4) {
+      // Add image_url column to products table
+      await db.execute('ALTER TABLE products ADD COLUMN image_url TEXT');
     }
   }
 }

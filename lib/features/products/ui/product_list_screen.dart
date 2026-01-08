@@ -12,17 +12,49 @@ class ProductListScreen extends StatefulWidget {
   State<ProductListScreen> createState() => _ProductListScreenState();
 }
 
-class _ProductListScreenState extends State<ProductListScreen> {
+class _ProductListScreenState extends State<ProductListScreen> with WidgetsBindingObserver {
   final _repo = ProductRepository();
+  List<ProductModel> _products = [];
+  bool _loading = true;
 
-  Future<List<ProductModel>> _load() => _repo.all();
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _load();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _load();
+    }
+  }
+
+  Future<void> _load() async {
+    setState(() => _loading = true);
+    final products = await _repo.allWithStock();
+    if (!mounted) return;
+    setState(() {
+      _products = products;
+      _loading = false;
+    });
+  }
 
   Future<void> _openForm({ProductModel? initial}) async {
     final changed = await Navigator.push<bool>(
       context,
       MaterialPageRoute(builder: (_) => ProductFormScreen(initial: initial)),
     );
-    if (changed == true && mounted) setState(() {});
+    if (changed == true || changed == null) {
+      _load(); // Auto refresh setelah form ditutup
+    }
   }
 
   Future<void> _delete(ProductModel product) async {
@@ -52,8 +84,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
     if (ok != true) return;
 
     await _repo.delete(id);
-    if (!mounted) return;
-    setState(() {});
+    _load(); // Auto refresh setelah delete
   }
 
   @override
@@ -63,33 +94,26 @@ class _ProductListScreenState extends State<ProductListScreen> {
         onPressed: () => _openForm(),
         child: const Icon(Icons.add),
       ),
-      body: FutureBuilder<List<ProductModel>>(
-        future: _load(),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          final items = snapshot.data!;
-          if (items.isEmpty) {
-            return const Center(child: Text('Belum ada produk. Tambahkan dulu.'));
-          }
-
-          return ListView.separated(
-            padding: const EdgeInsets.all(16),
-            itemCount: items.length,
-            separatorBuilder: (_, index) => const SizedBox(height: 12),
-            itemBuilder: (context, index) {
-              final p = items[index];
-              return ProductCard(
-                product: p,
-                onEdit: () => _openForm(initial: p),
-                onDelete: () => _delete(p),
-              );
-            },
-          );
-        },
-      ),
+      body: _loading
+          ? const Center(child: CircularProgressIndicator())
+          : _products.isEmpty
+              ? const Center(child: Text('Belum ada produk. Tambahkan dulu.'))
+              : RefreshIndicator(
+                  onRefresh: _load,
+                  child: ListView.separated(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: _products.length,
+                    separatorBuilder: (_, index) => const SizedBox(height: 12),
+                    itemBuilder: (context, index) {
+                      final p = _products[index];
+                      return ProductCard(
+                        product: p,
+                        onEdit: () => _openForm(initial: p),
+                        onDelete: () => _delete(p),
+                      );
+                    },
+                  ),
+                ),
     );
   }
 }

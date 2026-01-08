@@ -8,6 +8,7 @@ import '../repositories/cart_repository.dart';
 import '../../payments_history/models/transaction_model.dart';
 import '../../payments_history/prefs/payments_prefs.dart';
 import '../../payments_history/repositories/transaction_repository.dart';
+import '../../products/services/stock_service.dart';
 
 class CheckoutScreen extends StatefulWidget {
   const CheckoutScreen({super.key});
@@ -98,6 +99,31 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Keranjang masih kosong.')));
+      return;
+    }
+
+    // Validate stock availability for all items
+    final stockService = StockService();
+    final unavailableItems = <String>[];
+    
+    for (final item in _items) {
+      final canMake = await stockService.canMakeProduct(item.menuId, item.quantity);
+      if (!canMake) {
+        unavailableItems.add(item.menuName);
+      }
+    }
+    
+    if (unavailableItems.isNotEmpty) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Item berikut tidak bisa dibuat karena bahan tidak mencukupi:\n${unavailableItems.join(", ")}',
+          ),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 4),
+        ),
+      );
       return;
     }
 

@@ -7,6 +7,8 @@ class MaterialRepository {
 
   Future<List<MaterialModel>> all() => _db.all();
 
+  Future<MaterialModel?> byId(int id) => _db.byId(id);
+
   Future<int> create({
     required String name,
     required String unit,

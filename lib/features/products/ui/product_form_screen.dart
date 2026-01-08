@@ -1,4 +1,8 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart';
 
 import '../../materials/models/material_model.dart';
 import '../../materials/repositories/material_repository.dart';
@@ -19,6 +23,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _priceController = TextEditingController();
+  final _imagePicker = ImagePicker();
 
   final _materialRepo = MaterialRepository();
   final _productRepo = ProductRepository();
@@ -26,6 +31,8 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
   bool _saving = false;
   List<MaterialModel> _materials = const [];
   List<RecipeLine> _recipeLines = const [];
+  File? _imageFile;
+  String? _existingImageUrl;
 
   @override
   void initState() {
@@ -34,6 +41,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
     if (p != null) {
       _nameController.text = p.name;
       _priceController.text = p.price.toString();
+      _existingImageUrl = p.imageUrl;
     }
     _initData();
   }
@@ -74,6 +82,44 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
     super.dispose();
   }
 
+  Future<void> _pickImage() async {
+    try {
+      final pickedFile = await _imagePicker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 85,
+      );
+
+      if (pickedFile != null) {
+        setState(() {
+          _imageFile = File(pickedFile.path);
+        });
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Gagal memilih gambar: $e')),
+      );
+    }
+  }
+
+  Future<String?> _saveImageToLocal(File imageFile) async {
+    try {
+      final appDir = await getApplicationDocumentsDirectory();
+      final imagesDir = Directory('${appDir.path}/product_images');
+      if (!await imagesDir.exists()) {
+        await imagesDir.create(recursive: true);
+      }
+
+      final fileName = '${DateTime.now().millisecondsSinceEpoch}${path.extension(imageFile.path)}';
+      final savedImage = await imageFile.copy('${imagesDir.path}/$fileName');
+      return savedImage.path;
+    } catch (e) {
+      return null;
+    }
+  }
+
   Future<void> _save() async {
     final ok = _formKey.currentState?.validate() ?? false;
     if (!ok) return;
@@ -87,6 +133,12 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
 
     final name = _nameController.text.trim();
     final price = int.tryParse(_priceController.text) ?? 0;
+
+    // Save image if new image selected
+    String? imageUrl = _existingImageUrl;
+    if (_imageFile != null) {
+      imageUrl = await _saveImageToLocal(_imageFile!);
+    }
 
     final recipeItems = _recipeLines
         .where((l) => l.materialId != null && l.qty > 0)
@@ -105,11 +157,16 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
         await _productRepo.createWithRecipe(
           name: name,
           price: price,
+          imageUrl: imageUrl,
           recipeItems: recipeItems,
         );
       } else {
         await _productRepo.updateWithRecipe(
-          product: widget.initial!.copyWith(name: name, price: price),
+          product: widget.initial!.copyWith(
+            name: name,
+            price: price,
+            imageUrl: imageUrl,
+          ),
           recipeItems: recipeItems,
         );
       }
@@ -166,6 +223,75 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                             return null;
                           },
                         ),
+                        const SizedBox(height: 12),
+                        
+                        // Image Picker Section
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Gambar Produk',
+                              style: TextStyle(fontSize: 12, color: Colors.grey),
+                            ),
+                            const SizedBox(height: 8),
+                            GestureDetector(
+                              onTap: _pickImage,
+                              child: Container(
+                                height: 150,
+                                width: double.infinity,
+                                decoration: BoxDecoration(
+                                  border: Border.all(color: Colors.grey),
+                                  borderRadius: BorderRadius.circular(8),
+                                  color: Theme.of(context).cardColor,
+                                ),
+                                child: _imageFile != null
+                                    ? ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: Image.file(
+                                          _imageFile!,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      )
+                                    : _existingImageUrl != null
+                                        ? ClipRRect(
+                                            borderRadius: BorderRadius.circular(8),
+                                            child: Image.file(
+                                              File(_existingImageUrl!),
+                                              fit: BoxFit.cover,
+                                              errorBuilder: (_, __, ___) => _buildImagePlaceholder(),
+                                            ),
+                                          )
+                                        : _buildImagePlaceholder(),
+                              ),
+                            ),
+                            if (_imageFile != null || _existingImageUrl != null)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 8),
+                                child: TextButton.icon(
+                                  onPressed: () {
+                                    setState(() {
+                                      _imageFile = null;
+                                      _existingImageUrl = null;
+                                    });
+                                  },
+                                  icon: const Icon(Icons.delete, size: 18),
+                                  label: const Text('Hapus Gambar'),
+                                  style: TextButton.styleFrom(
+                                    foregroundColor: Colors.red,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        const Text(
+                          'Stok akan dihitung otomatis berdasarkan bahan yang tersedia',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey,
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
                         const SizedBox(height: 16),
                         RecipeInputWidget(
                           materials: _materials,
@@ -192,6 +318,27 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                 ],
               ),
       ),
+    );
+  }
+
+  Widget _buildImagePlaceholder() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(
+          Icons.add_photo_alternate,
+          size: 48,
+          color: Colors.grey[400],
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Tap untuk pilih gambar',
+          style: TextStyle(
+            color: Colors.grey[600],
+            fontSize: 14,
+          ),
+        ),
+      ],
     );
   }
 }

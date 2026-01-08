@@ -27,9 +27,47 @@ class ProductRepository {
   Future<List<RecipeItemModel>> recipeByProduct(int productId) =>
       _recipeDb.byProduct(productId);
 
+  /// Calculate available stock based on materials
+  Future<int> calculateAvailableStock(int productId) async {
+    final recipe = await _recipeDb.byProduct(productId);
+    if (recipe.isEmpty) return 0;
+
+    final materials = await _materialDb.all();
+    
+    int minStock = 999999;
+    for (final recipeItem in recipe) {
+      final material = materials.where((m) => m.id == recipeItem.materialId).firstOrNull;
+      if (material == null) return 0;
+      
+      // Calculate how many products can be made from this material
+      final possibleFromThisMaterial = (material.stock / recipeItem.qty).floor();
+      
+      // The minimum determines the actual available stock
+      if (possibleFromThisMaterial < minStock) {
+        minStock = possibleFromThisMaterial;
+      }
+    }
+    
+    return minStock == 999999 ? 0 : minStock;
+  }
+
+  /// Get products with calculated stock
+  Future<List<ProductModel>> allWithStock() async {
+    final products = await _productDb.all();
+    final productsWithStock = <ProductModel>[];
+    
+    for (final product in products) {
+      final calculatedStock = await calculateAvailableStock(product.id!);
+      productsWithStock.add(product.copyWith(stock: calculatedStock));
+    }
+    
+    return productsWithStock;
+  }
+
   Future<int> createWithRecipe({
     required String name,
     required int price,
+    String? imageUrl,
     required List<RecipeItemModel> recipeItems,
   }) async {
     final db = await AppDatabase.instance.database;
@@ -38,7 +76,13 @@ class ProductRepository {
     return db.transaction((txn) async {
       final productId = await txn.insert(
         ProductDb.table,
-        ProductModel(name: name, price: price, createdAt: now).toMap(),
+        ProductModel(
+          name: name,
+          price: price,
+          stock: 0,
+          imageUrl: imageUrl,
+          createdAt: now,
+        ).toMap(),
       );
 
       for (final item in recipeItems) {

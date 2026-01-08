@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 
 import '../../cart_orders/prefs/cart_prefs.dart';
+import '../../products/services/stock_service.dart';
 import '../models/transaction_model.dart';
 import '../prefs/payments_prefs.dart';
 import '../repositories/transaction_repository.dart';
@@ -81,7 +83,23 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
     setState(() => _paying = true);
     try {
-      await _repo.setStatus(tx!.id!, 'paid');
+      // Parse items from transaction
+      final itemsJson = tx!.itemsJson;
+      if (itemsJson != null && itemsJson.isNotEmpty) {
+        try {
+          final items = jsonDecode(itemsJson) as List;
+          final itemsList = items.map((e) => Map<String, dynamic>.from(e as Map)).toList();
+          
+          // Deduct materials stock
+          final stockService = StockService();
+          await stockService.deductMaterialsFromTransaction(itemsList);
+        } catch (e) {
+          // Handle JSON parsing error
+          print('Error parsing items: $e');
+        }
+      }
+      
+      await _repo.setStatus(tx.id!, 'paid');
       await PaymentsPrefs.setLastStatus('paid');
       if (!mounted) return;
       Navigator.pushNamedAndRemoveUntil(context, '/history', (r) => false);
