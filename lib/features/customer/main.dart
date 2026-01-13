@@ -96,8 +96,8 @@ class CafeApp extends StatelessWidget {
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: const Color(0xFFEFF3E9), // Light green background
         indicatorColor: const Color(0xFF22C55E).withOpacity(0.2),
-        labelTextStyle: MaterialStateProperty.resolveWith((states) {
-          if (states.contains(MaterialState.selected)) {
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
             return const TextStyle(
                 color: Color(0xFF22C55E), fontWeight: FontWeight.w600);
           }
@@ -156,8 +156,8 @@ class CafeApp extends StatelessWidget {
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: const Color(0xFF1B1B1B),
         indicatorColor: const Color(0xFF4CAF50).withOpacity(0.2),
-        labelTextStyle: MaterialStateProperty.resolveWith((states) {
-          if (states.contains(MaterialState.selected)) {
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
             return const TextStyle(
                 color: Color(0xFF4CAF50), fontWeight: FontWeight.w600);
           }

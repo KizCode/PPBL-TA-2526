@@ -85,7 +85,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
     try {
       // Parse items from transaction
       final itemsJson = tx!.itemsJson;
-      if (itemsJson != null && itemsJson.isNotEmpty) {
+      if (itemsJson.isNotEmpty) {
         try {
           final items = jsonDecode(itemsJson) as List;
           final itemsList = items.map((e) => Map<String, dynamic>.from(e as Map)).toList();

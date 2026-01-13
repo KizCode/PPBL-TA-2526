@@ -145,8 +145,8 @@ class _HomeDashboardTabState extends State<HomeDashboardTab> {
               title: const Text('Kopi Susu Gula Aren, 2 item'),
               subtitle: Text('Total: ${rupiah(45000)} • 10 Des 2025'),
               trailing: TextButton(
-                child: const Text('Lihat'),
                 onPressed: _openCart,
+                child: const Text('Lihat'),
               ),
             ),
           ),

@@ -141,15 +141,15 @@ class _KasirPageState extends State<KasirPage> {
                   return;
                 }
                 final change = paid - _total;
-                
+
                 // Tutup dialog pembayaran
                 Navigator.pop(dialogContext);
-                
+
                 // Tunggu sebentar agar dialog tertutup
                 await Future.delayed(const Duration(milliseconds: 100));
-                
+
                 if (!mounted) return;
-                
+
                 // Reduce materials stock for each cart item
                 try {
                   for (final entry in _cart.entries) {
@@ -161,12 +161,12 @@ class _KasirPageState extends State<KasirPage> {
                   }
                 } catch (e) {
                   if (!mounted) return;
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Error: $e')),
-                  );
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text('Error: $e')));
                   return;
                 }
-                
+
                 // Save transaction to database
                 try {
                   await _saveTransaction('Tunai');
@@ -176,15 +176,15 @@ class _KasirPageState extends State<KasirPage> {
                     SnackBar(content: Text('Error menyimpan transaksi: $e')),
                   );
                 }
-                
+
                 // Clear cart
                 setState(() {
                   _cart.clear();
                 });
-                
+
                 // Reload menu to update stock
                 await _loadProduk();
-                
+
                 // Tampilkan dialog kembalian
                 showDialog(
                   context: context,
@@ -222,12 +222,12 @@ class _KasirPageState extends State<KasirPage> {
               onPressed: () async {
                 // Tutup dialog konfirmasi
                 Navigator.pop(dialogContext);
-                
+
                 // Tunggu sebentar
                 await Future.delayed(const Duration(milliseconds: 100));
-                
+
                 if (!mounted) return;
-                
+
                 // Reduce materials stock for each cart item
                 try {
                   for (final entry in _cart.entries) {
@@ -239,12 +239,12 @@ class _KasirPageState extends State<KasirPage> {
                   }
                 } catch (e) {
                   if (!mounted) return;
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Error: $e')),
-                  );
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text('Error: $e')));
                   return;
                 }
-                
+
                 // Save transaction to database
                 try {
                   await _saveTransaction(_paymentMethod);
@@ -254,15 +254,15 @@ class _KasirPageState extends State<KasirPage> {
                     SnackBar(content: Text('Error menyimpan transaksi: $e')),
                   );
                 }
-                
+
                 // Clear cart
                 setState(() {
                   _cart.clear();
                 });
-                
+
                 // Reload menu to update stock
                 await _loadProduk();
-                
+
                 // Tampilkan snackbar
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Pembayaran berhasil')),
@@ -376,6 +376,13 @@ class _KasirPageState extends State<KasirPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('cafeSync — Kasir'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          tooltip: 'Kembali ke dashboard',
+          onPressed: () {
+            Navigator.of(context, rootNavigator: true).maybePop();
+          },
+        ),
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
         elevation: 0,
@@ -448,7 +455,6 @@ class _KasirPageState extends State<KasirPage> {
           },
         ),
       ),
-
     );
   }
 }

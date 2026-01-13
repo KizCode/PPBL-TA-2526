@@ -67,10 +67,11 @@ class CartState {
     final idx = items.indexWhere((it) => it['id'] == id);
     if (idx >= 0) {
       final q = items[idx]['quantity'] as int;
-      if (q > 1)
+      if (q > 1) {
         items[idx]['quantity'] = q - 1;
-      else
+      } else {
         items.removeAt(idx);
+      }
     }
     await _saveCart();
   }
