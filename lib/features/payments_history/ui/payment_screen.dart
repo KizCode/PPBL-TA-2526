@@ -85,11 +85,13 @@ class _PaymentScreenState extends State<PaymentScreen> {
     try {
       // Parse items from transaction
       final itemsJson = tx!.itemsJson;
-      if (itemsJson != null && itemsJson.isNotEmpty) {
+      if (itemsJson.isNotEmpty) {
         try {
           final items = jsonDecode(itemsJson) as List;
-          final itemsList = items.map((e) => Map<String, dynamic>.from(e as Map)).toList();
-          
+          final itemsList = items
+              .map((e) => Map<String, dynamic>.from(e as Map))
+              .toList();
+
           // Deduct materials stock
           final stockService = StockService();
           await stockService.deductMaterialsFromTransaction(itemsList);
@@ -98,7 +100,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
           print('Error parsing items: $e');
         }
       }
-      
+
       await _repo.setStatus(tx.id!, 'paid');
       await PaymentsPrefs.setLastStatus('paid');
       if (!mounted) return;

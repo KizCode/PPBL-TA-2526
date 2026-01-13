@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import 'core/db/app_database.dart';
-import 'core/prefs/app_prefs.dart';
 
 import 'features/auth_customer/prefs/auth_prefs.dart';
 import 'features/auth_customer/ui/login_screen.dart';
@@ -19,7 +18,7 @@ Future<void> main() async {
   await AppDatabase.instance.database;
 
   // Read login state to decide initial route
-  final loggedIn = await AppPrefs.getBool(AuthPrefs.keyLoggedIn) ?? false;
+  final loggedIn = await AuthPrefs.isLoggedIn();
 
   runApp(MyApp(initialRoute: loggedIn ? '/menu' : '/login'));
 }

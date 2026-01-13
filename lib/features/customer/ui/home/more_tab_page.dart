@@ -2,7 +2,6 @@
 import 'package:flutter/material.dart';
 import '../order/order_tracking_page.dart';
 import '../order/digital_receipt_page.dart';
-import 'settings_page.dart';
 
 class MoreTabPage extends StatelessWidget {
   const MoreTabPage({super.key});
