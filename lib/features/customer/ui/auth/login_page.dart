@@ -34,13 +34,13 @@ class _LoginPageState extends State<LoginPage> {
 
     setState(() => loading = true);
     await Future.delayed(const Duration(milliseconds: 800)); // simulasi API
-    
+
     // Simpan data login
     final email = identityCtrl.text.trim();
     await AuthPrefs.setLoggedIn(true);
     await AuthPrefs.setUserId(1); // Default user ID
     await AuthPrefs.setUsername(email);
-    
+
     // Simpan data akun (untuk sementara gunakan email sebagai nama jika belum ada)
     if (email.contains('@')) {
       await AuthPrefs.setEmail(email);
@@ -49,7 +49,7 @@ class _LoginPageState extends State<LoginPage> {
       await AuthPrefs.setPhone(email);
       await AuthPrefs.setFullName('User');
     }
-    
+
     setState(() => loading = false);
 
     _showSnack('Login berhasil');
@@ -82,8 +82,11 @@ class _LoginPageState extends State<LoginPage> {
                       color: Colors.black,
                       borderRadius: BorderRadius.circular(14),
                     ),
-                    child: const Icon(Icons.local_cafe,
-                        color: Colors.white, size: 36),
+                    child: const Icon(
+                      Icons.local_cafe,
+                      color: Colors.white,
+                      size: 36,
+                    ),
                   ),
                   const SizedBox(height: 20),
 
@@ -126,7 +129,8 @@ class _LoginPageState extends State<LoginPage> {
                       border: const OutlineInputBorder(),
                       suffixIcon: IconButton(
                         icon: Icon(
-                            obscure ? Icons.visibility_off : Icons.visibility),
+                          obscure ? Icons.visibility_off : Icons.visibility,
+                        ),
                         onPressed: () => setState(() => obscure = !obscure),
                         tooltip: obscure ? 'Tampilkan' : 'Sembunyikan',
                       ),
@@ -167,7 +171,7 @@ class _LoginPageState extends State<LoginPage> {
                   GestureDetector(
                     onTap: () async {
                       if (loading) return;
-                      
+
                       // Simpan sebagai guest
                       await AuthPrefs.setLoggedIn(true);
                       await AuthPrefs.setUserId(0); // Guest user
@@ -175,7 +179,7 @@ class _LoginPageState extends State<LoginPage> {
                       await AuthPrefs.setFullName('Guest User');
                       await AuthPrefs.setEmail('-');
                       await AuthPrefs.setPhone('-');
-                      
+
                       _showSnack('Lanjut sebagai Guest');
                       await Future.delayed(const Duration(milliseconds: 300));
                       if (!mounted) return;
@@ -184,8 +188,10 @@ class _LoginPageState extends State<LoginPage> {
                     },
                     child: const Text(
                       'Lanjut tanpa login',
-                      style:
-                          TextStyle(color: green, fontWeight: FontWeight.w600),
+                      style: TextStyle(
+                        color: green,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ],
